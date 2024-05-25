@@ -2,6 +2,8 @@
 #include <grpc/grpc.h>
 #include <grpcpp/security/server_credentials.h>
 #include <grpcpp/server_builder.h>
+#include <grpcpp/support/status.h>
+#include <grpcpp/support/sync_stream.h>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -11,6 +13,7 @@ using grpc::Server;
 using grpc::ServerBuilder;
 using grpc::ServerContext;
 using grpc::Status;
+using grpc::ServerReaderWriter;
 
 class HelloworldImpl final : public HelloworldService::Service {
 public:
@@ -18,6 +21,17 @@ public:
                   MsgResp *resp) override {
     std::cout << "recv req from " << req->ip() << "\n";
     resp->set_reply("Hello " + req->name());
+    return Status::OK;
+  }
+
+  Status GetStreamReply(ServerContext* context, ServerReaderWriter<MsgResp,MsgReq>* stream) override{
+    MsgReq req;
+    MsgResp resp;
+    while(stream->Read(&req)){
+      std::cout << "recv req from " << req.ip() << "\n";
+      resp.set_reply("Hello " + req.name());
+      stream->Write(resp);
+    }
     return Status::OK;
   }
 };

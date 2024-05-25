@@ -1,4 +1,5 @@
 #include "gen_code/Helloworld.grpc.pb.h"
+#include "gen_code/Helloworld.pb.h"
 #include <grpc/grpc.h>
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
@@ -7,6 +8,7 @@
 #include <grpcpp/support/status.h>
 #include <iostream>
 #include <memory>
+#include <string>
 
 using namespace Helloworld;
 using grpc::ClientContext;
@@ -33,6 +35,26 @@ public:
     }
   }
 
+  void GetStreamReply(){
+    MsgReq req;
+    MsgResp resp;
+    req.set_ip("192.168.1.53");
+    ClientContext context;
+    auto stream = stub_->GetStreamReply(&context);
+    for(int i = 0;i < 10;i++){
+      req.set_name(std::to_string(i));
+      stream->Write(req);
+    }
+    stream->WritesDone();
+    while(stream->Read(&resp)){
+      std::cout << resp.reply() << "\n";
+    }
+    Status status = stream->Finish();
+    if(!status.ok()){
+      std::cout << "GetStreamReply rpc failed\n";
+    }
+  }
+
 private:
   std::shared_ptr<HelloworldService::Stub> stub_;
 };
@@ -40,6 +62,6 @@ private:
 int main() {
   HelloworldClient client(grpc::CreateChannel(
       "192.168.1.53:50959", grpc::InsecureChannelCredentials()));
-  client.GetReply();
+  client.GetStreamReply();
   return 0;
 }

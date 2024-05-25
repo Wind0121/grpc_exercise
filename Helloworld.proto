@@ -4,6 +4,8 @@ package Helloworld;
 
 service HelloworldService{
     rpc GetReply(MsgReq) returns (MsgResp){}
+
+    rpc GetStreamReply(stream MsgReq) returns (stream MsgResp){}
 }
 
 message MsgReq{
