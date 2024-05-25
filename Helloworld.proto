@@ -1,0 +1,16 @@
+syntax="proto3";
+
+package Helloworld;
+
+service HelloworldService{
+    rpc GetReply(MsgReq) returns (MsgResp){}
+}
+
+message MsgReq{
+    string name = 1;
+    string ip = 2;
+}
+
+message MsgResp{
+    string reply = 1;
+}
